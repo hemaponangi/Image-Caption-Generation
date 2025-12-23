@@ -1,31 +1,37 @@
-from flask import Flask, render_template, request
+import streamlit as st
 from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
-import torch
 
-app = Flask(__name__)
+st.set_page_config(page_title="AI Image Caption Generator")
 
-# Load pre-trained model
-processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-model = BlipForConditionalGeneration.from_pretrained(
-    "Salesforce/blip-image-captioning-base"
+st.title("🖼️ AI Image Caption Generator")
+st.write("Upload an image to generate a caption")
+
+@st.cache_resource
+def load_model():
+    processor = BlipProcessor.from_pretrained(
+        "Salesforce/blip-image-captioning-base"
+    )
+    model = BlipForConditionalGeneration.from_pretrained(
+        "Salesforce/blip-image-captioning-base"
+    )
+    return processor, model
+
+processor, model = load_model()
+
+uploaded_file = st.file_uploader(
+    "Choose an image",
+    type=["jpg", "jpeg", "png"]
 )
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    caption = ""
-    if request.method == "POST":
-        image_file = request.files["image"]
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGB")
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
-        if image_file:
-            image = Image.open(image_file).convert("RGB")
+    if st.button("Generate Caption"):
+        inputs = processor(image, return_tensors="pt")
+        output = model.generate(**inputs)
+        caption = processor.decode(output[0], skip_special_tokens=True)
 
-            inputs = processor(image, return_tensors="pt")
-            output = model.generate(**inputs)
-
-            caption = processor.decode(output[0], skip_special_tokens=True)
-
-    return render_template("index.html", caption=caption)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        st.success("Generated Caption:")
+        st.write(caption)
