@@ -1,23 +1,2 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>AI Image Caption Generator</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
 
-<h2>AI Tool for Image Caption Generation</h2>
 
-<form method="POST" enctype="multipart/form-data">
-    <input type="file" name="image" required>
-    <br><br>
-    <button type="submit">Generate Caption</button>
-</form>
-
-{% if caption %}
-    <h3>Generated Caption:</h3>
-    <p>{{ caption }}</p>
-{% endif %}
-
-</body>
-</html>
