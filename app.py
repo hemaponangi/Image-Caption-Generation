@@ -33,4 +33,11 @@ if uploaded_file is not None:
 
     if st.button("Generate Caption"):
         with st.spinner("Generating caption..."):
+            inputs = processor(image, return_tensors="pt")
+            output = model.generate(**inputs)
+            caption = processor.decode(
+                output[0], skip_special_tokens=True
+            )
 
+        st.success("Generated Caption:")
+        st.write(f"👉 **{caption}**")
